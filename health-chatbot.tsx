@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { User, Send, ChevronLeft, ChevronRight, ArrowLeft } from "lucide-react"
 import { sendMessageToBot } from "@/lib/api"
+import type { ChatResponse } from "@/lib/api"
 import ChatDisplay from "@/components/ChatDisplay"
 
 // Define message type for better TypeScript support
@@ -81,10 +82,10 @@ export default function HealthChatbot() {
       // Send message to API and get bot response
       const response = await sendMessageToBot(messageText);
       
-      // Create bot message object
+      // Create bot message object using the output from n8n
       const botMessage: Message = {
         id: (Date.now() + 1).toString(),
-        text: (response as any).reply || '죄송합니다. 요청을 처리할 수 없습니다.',
+        text: response.output,
         isUser: false,
         timestamp: new Date(),
       };
@@ -92,6 +93,7 @@ export default function HealthChatbot() {
       // Add bot message to chat
       setMessages(prev => [...prev, botMessage]);
     } catch (error) {
+      console.error('Error in chat:', error);
       // Handle error by showing error message
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
