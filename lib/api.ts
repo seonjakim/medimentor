@@ -124,6 +124,20 @@ const runAPI = {
   }
 };
 
+// 응답 텍스트 정리 함수
+function cleanResponseText(text: string): string {
+  // "【숫자:숫자†source】" 패턴 제거
+  const citationPattern = /【\d+:\d+†source】/g;
+  
+  // 여러 공백을 하나로 정리
+  const cleanedText = text
+    .replace(citationPattern, '') // 인용 패턴 제거
+    .replace(/\s+/g, ' ') // 여러 공백을 하나로
+    .trim(); // 앞뒤 공백 제거
+  
+  return cleanedText;
+}
+
 // 메인 챗봇 메시지 전송 함수
 export async function sendMessageToBot(utterance: string, threadId?: string): Promise<ChatResponse> {
   try {
@@ -159,8 +173,12 @@ export async function sendMessageToBot(utterance: string, threadId?: string): Pr
       throw new Error('No assistant response found');
     }
 
+    // 6. 응답 텍스트 정리
+    const rawResponse = assistantMessage.content[0]?.text?.value || '죄송합니다. 답변을 생성하는 중 오류가 발생했습니다.';
+    const cleanedResponse = cleanResponseText(rawResponse);
+
     return {
-      output: assistantMessage.content[0]?.text?.value || '죄송합니다. 답변을 생성하는 중 오류가 발생했습니다.',
+      output: cleanedResponse,
       threadId: currentThreadId
     };
   } catch (error) {
