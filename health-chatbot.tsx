@@ -21,6 +21,7 @@ export default function HealthChatbot() {
   const [currentSlide, setCurrentSlide] = useState(0)
   const [messages, setMessages] = useState<Message[]>([])
   const [isLoading, setIsLoading] = useState(false)
+  const [threadId, setThreadId] = useState<string | undefined>(undefined)
 
   const recommendedQuestions = [
     "간암 진단 받고 수술 날짜 잡았는데, 당분간 어떤 음식은 꼭 피해야 하나요?",
@@ -80,9 +81,14 @@ export default function HealthChatbot() {
 
     try {
       // Send message to API and get bot response
-      const response = await sendMessageToBot(messageText);
+      const response = await sendMessageToBot(messageText, threadId);
       
-      // Create bot message object using the output from n8n
+      // Update thread ID if it's a new conversation
+      if (response.threadId && !threadId) {
+        setThreadId(response.threadId);
+      }
+      
+      // Create bot message object using the output from OpenAI Assistant
       const botMessage: Message = {
         id: (Date.now() + 1).toString(),
         text: response.output,
